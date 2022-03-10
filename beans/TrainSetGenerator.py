@@ -1,7 +1,8 @@
 import cv2
 import os
 import pafy
-import numpy as np
+
+from helpers.face_helper import get_faces
 
 
 class TrainSetGenerator:
@@ -16,7 +17,6 @@ class TrainSetGenerator:
         prototxt = "./ml_artifacts/deploy.prototxt.txt"
         model = "./ml_artifacts/res10_300x300_ssd_iter_140000.caffemodel"
 
-        self.min_confidence = 0.5
         video = pafy.new(video_url)
         self.cached_video = video.getbest(preftype="mp4")
         self.net = cv2.dnn.readNetFromCaffe(prototxt, model)
@@ -28,27 +28,17 @@ class TrainSetGenerator:
         while video_capture.isOpened():
             _, frame = video_capture.read()
             frame_counter += 1
-            (h, w) = frame.shape[:2]
-            blob = cv2.dnn.blobFromImage(cv2.resize(frame, (300, 300)), 1.0, (300, 300), (104.0, 177.0, 123.0))
-            self.net.setInput(blob)
-            detections = self.net.forward()
+            faces = get_faces(frame, self.net)
 
-            for i in range(0, detections.shape[2]):
-                confidence = detections[0, 0, i, 2]
-
-                if confidence < self.min_confidence:
-                    continue
-
-                box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
-                (startX, startY, endX, endY) = box.astype("int")
+            for (startX, startY, endX, endY) in faces:
                 face_frame = frame[startY:endY, startX:endX]
                 if abs(startX-210) < 100:
                     frame_color = self.GREEN
-                    if frame_counter % 100 == 0:
+                    if frame_counter % 30 == 0:
                         save_image(face_frame, "faces/sober")
                 elif abs(startX-575) < 100:
                     frame_color = self.RED
-                    if frame_counter % 100 == 0:
+                    if frame_counter % 30 == 0:
                         save_image(face_frame, "faces/alcoholic")
                 else:
                     frame_color = self.BLUE
