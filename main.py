@@ -1,5 +1,5 @@
-from beans.TrainSetGenerator import TrainSetGenerator
+from beans.TestSetGenerator import TestSetGenerator
 
 if __name__ == '__main__':
-    generator = TrainSetGenerator("https://www.youtube.com/watch?v=cFiJOgB56vk")
-    generator.capture_faces()
+    test_generator = TestSetGenerator("photo.jpg")
+    test_generator.capture_faces()

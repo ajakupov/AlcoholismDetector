@@ -5,7 +5,7 @@ import pafy
 from helpers.face_helper import get_faces
 
 
-class TrainSetGenerator:
+class TestSetGenerator:
     # BGR color constants
     WHITE = (255, 255, 255)
     BLUE = (255, 0, 0)
@@ -13,38 +13,25 @@ class TrainSetGenerator:
     RED = (0, 0, 255)
     BLACK = (0, 0, 0)
 
-    def __init__(self, video_url):
+    def __init__(self, image_path):
         prototxt = "./ml_artifacts/deploy.prototxt.txt"
         model = "./ml_artifacts/res10_300x300_ssd_iter_140000.caffemodel"
 
-        video = pafy.new(video_url)
-        self.cached_video = video.getbest(preftype="mp4")
+        self.image_path = image_path
         self.net = cv2.dnn.readNetFromCaffe(prototxt, model)
 
-    def capture_faces_from_video(self):
-        video_capture = cv2.VideoCapture(self.cached_video.url)
-        frame_counter = 0
+    def capture_faces(self):
+        frame = cv2.imread(self.image_path)
+        faces = get_faces(frame, self.net)
+        frame_color = self.BLUE
 
-        while video_capture.isOpened():
-            _, frame = video_capture.read()
-            frame_counter += 1
-            faces = get_faces(frame, self.net)
-            frame_color = self.BLUE
+        for (startX, startY, endX, endY) in faces:
+            face_frame = frame[startY:endY, startX:endX]
+            save_image(face_frame, "faces")
 
-            for (startX, startY, endX, endY) in faces:
-                face_frame = frame[startY:endY, startX:endX]
-                if frame_counter % 30 == 0:
-                    save_image(face_frame, "faces")
+            cv2.rectangle(frame, (startX, startY), (endX, endY), frame_color, 2)
 
-                cv2.rectangle(frame, (startX, startY), (endX, endY), frame_color, 2)
-
-                cv2.imshow("Frame", frame)
-                key = cv2.waitKey(1) & 0xFF
-
-                if key == ord("q"):
-                    break
-        video_capture.release()
-        cv2.destroyAllWindows()
+        cv2.imshow("Frame", frame)
 
 
 def save_image(image, folder):
