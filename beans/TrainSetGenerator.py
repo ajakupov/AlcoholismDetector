@@ -1,6 +1,7 @@
 import cv2
 import os
 import pafy
+import imutils
 
 from helpers.face_helper import get_faces
 
@@ -28,12 +29,13 @@ class TrainSetGenerator:
         while video_capture.isOpened():
             _, frame = video_capture.read()
             frame_counter += 1
+            frame = imutils.resize(frame, width=400)
             faces = get_faces(frame, self.net)
             frame_color = self.BLUE
 
             for (startX, startY, endX, endY) in faces:
                 face_frame = frame[startY:endY, startX:endX]
-                if frame_counter % 30 == 0:
+                if frame_counter % 2 == 0:
                     save_image(face_frame, "faces")
 
                 cv2.rectangle(frame, (startX, startY), (endX, endY), frame_color, 2)
@@ -64,6 +66,8 @@ def save_image(image, folder):
 
     # increment image counter
     image_counter += 1
-
-    # save image to the dedicated folder (folder name = label)
-    cv2.imwrite(folder + '/' + str(image_counter) + '.png', image)
+    try:
+        # save image to the dedicated folder (folder name = label)
+        cv2.imwrite(folder + '/' + str(image_counter) + '.png', image)
+    except:
+        print("Unable to save the frame")

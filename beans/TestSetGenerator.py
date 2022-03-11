@@ -29,10 +29,6 @@ class TestSetGenerator:
             face_frame = frame[startY:endY, startX:endX]
             save_image(face_frame, "faces")
 
-            cv2.rectangle(frame, (startX, startY), (endX, endY), frame_color, 2)
-
-        cv2.imshow("Frame", frame)
-
 
 def save_image(image, folder):
     """Save an image with unique name

@@ -3,7 +3,7 @@ import numpy as np
 
 
 def get_faces(frame, net):
-    min_confidence = 0.5
+    min_confidence = 0.7
     (h, w) = frame.shape[:2]
     blob = cv2.dnn.blobFromImage(cv2.resize(frame, (300, 300)), 1.0, (300, 300), (104.0, 177.0, 123.0))
     net.setInput(blob)
