@@ -1,6 +1,6 @@
 import cv2
 import os
-import pafy
+import imutils
 
 from helpers.face_helper import get_faces
 
@@ -22,6 +22,7 @@ class TestSetGenerator:
 
     def capture_faces(self):
         frame = cv2.imread(self.image_path)
+        frame = imutils.resize(frame, width=400)
         faces = get_faces(frame, self.net)
         frame_color = self.BLUE
 
